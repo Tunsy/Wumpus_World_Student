@@ -21,6 +21,7 @@ from Agent import Agent
 from enum import Enum
 import random
 
+
 class MyAI ( Agent ):
     def __init__ ( self ):
         # ======================================================================
@@ -30,13 +31,16 @@ class MyAI ( Agent ):
         self.probabilityMap = [[0 for x in range(10)] for y in range(10)]
         self.currentX = 0
         self.currentY = 9
-        self.hasGold = False;
+        self.isRetreating = False;
         self.minBoundX = 0
         self.maxBoundX = 9
         self.minBoundY = 0
         self.maxBoundY = 9
         self.currentDirection = self.Direction.EAST
         self.probabilityMap[self.currentY][self.currentX] = 0
+        self.wentEast = False
+        self.hasGold = False
+        self.isRetreating = False
         # ======================================================================
         # YOUR CODE ENDS
         # ======================================================================
@@ -45,12 +49,72 @@ class MyAI ( Agent ):
         # ======================================================================
         # YOUR CODE BEGINS
         # ======================================================================
-        self.probabilityMap[self.currentY][self.currentX] = 0
-        
+        # self.probabilityMap[self.currentY][self.currentX] = 0
+
         if bump is True:
             self.bump_undo()
             self.update_border()
         
+        # if stench is False and breeze is False:
+        #     return self.move(Agent.Action.FORWARD)
+        # else:
+        # return self.turn_random()
+        
+        if(self.wentEast is False):
+            if glitter is True:
+                self.isRetreating = True
+                self.hasGold = True
+                return self.move(Agent.Action.GRAB)
+            elif self.currentY is self.maxBoundY and self.currentX is self.minBoundX and (stench is True or breeze is True):
+                return self.move(Agent.Action.CLIMB)
+            elif self.isRetreating is False and (stench is True or breeze is True):
+                self.isRetreating = True
+                return self.move(Agent.Action.TURN_LEFT)
+            elif self.isRetreating is True and self.currentDirection is not self.Direction.WEST:
+                return self.move(Agent.Action.TURN_LEFT)
+            elif self.isRetreating is True and self.currentDirection is self.Direction.WEST and self.currentY is not self.maxBoundY and self.currentX is not self.minBoundX:
+                return self.move(Agent.Action.FORWARD)
+            elif self.currentDirection is self.Direction.WEST and self.currentY is self.maxBoundY and self.currentX is self.minBoundX and self.hasGold is True:
+                return self.move(Agent.Action.CLIMB)
+            elif self.currentDirection is self.Direction.WEST and self.currentY is self.maxBoundY and self.currentX is self.minBoundX and self.isRetreating is True and self.hasGold is False:
+                self.wentEast = True
+                self.isRetreating = False
+                return self.move(Agent.Action.TURN_RIGHT)
+            elif self.isRetreating is False and bump is True and self.currentDirection is not self.Direction.WEST:
+                self.isRetreating = True
+                return self.move(Agent.Action.TURN_LEFT)
+            elif self.isRetreating is True and self.currentDirection is self.Direction.NORTH:
+                return self.move(Agent.Action.TURN_LEFT)
+            else:
+                return self.move(Agent.Action.FORWARD)
+        elif(self.wentEast is True):
+            if glitter is True:
+                self.isRetreating = True
+                self.hasGold = True
+                return self.move(Agent.Action.GRAB)
+            elif self.currentY is self.maxBoundY and self.currentX is self.minBoundX and (stench is True or breeze is True):
+                return self.move(Agent.Action.CLIMB)
+            elif self.isRetreating is False and (stench is True or breeze is True):
+                self.isRetreating = True
+                return self.move(Agent.Action.TURN_LEFT)
+            elif self.isRetreating is True and self.currentDirection is not self.Direction.SOUTH:
+                return self.move(Agent.Action.TURN_LEFT)
+            elif self.isRetreating is True and self.currentDirection is self.Direction.SOUTH and self.currentY is not self.maxBoundY and self.currentX is not self.minBoundX:
+                return self.move(Agent.Action.FORWARD)
+            elif self.currentDirection is self.Direction.SOUTH and self.currentY is self.maxBoundY and self.currentX is self.minBoundX and self.isRetreating is True:
+                return self.move(Agent.Action.CLIMB)
+            elif self.isRetreating is False and bump is True and self.currentDirection is not self.Direction.SOUTH:
+                self.isRetreating = True
+                return self.move(Agent.Action.TURN_LEFT)
+            elif self.isRetreating is True and self.currentDirection is self.Direction.WEST:
+                return self.move(Agent.Action.TURN_LEFT)
+            else:
+                return self.move(Agent.Action.FORWARD)
+
+        # if isRetreating is True:
+             # TODO: has gold action
+
+
         return Agent.Action.CLIMB
         # ======================================================================
         # YOUR CODE ENDS
